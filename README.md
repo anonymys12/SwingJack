@@ -33,8 +33,6 @@ SwingJack/
 ├── resources/
 │ └── cards/ ← PNG-картки (2_of_clubs.png, ace_of_hearts.png і т.д.)
 └── README.md
-
-
 ---
 
 ## Запуск
