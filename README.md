@@ -45,4 +45,5 @@ java -cp out example.swingjack.BlackjackGUI
 Імена карт у форматі: 2_of_clubs.png, ace_of_hearts.png, jack_of_spades.png і т.д.
 
 Клас Card автоматично підбирає картинку по масті і рангу.
+                                                                    <img width="1920" height="1014" alt="image" src="https://github.com/user-attachments/assets/314c8db6-fd3f-4ee2-884a-d89f31f3215d" />
 
