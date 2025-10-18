@@ -25,13 +25,13 @@ SwingJack — це простий **Blackjack** на Java з графічним 
 
 SwingJack/
 ├── src/
-│ └── example/swingjack/
-│ ├── BlackjackGUI.java
-│ ├── Card.java
-│ ├── CardPanel.java
-│ └── Deck.java
+│ example/swingjack/
+│  BlackjackGUI.java
+│  Card.java
+│  CardPanel.java
+│  Deck.java
 ├── resources/
-│ └── cards/ ← PNG-картки (2_of_clubs.png, ace_of_hearts.png і т.д.)
+│   cards/ ← PNG-картки (2_of_clubs.png, ace_of_hearts.png і т.д.)
 └── README.md
 ---
 
