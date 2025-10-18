@@ -32,29 +32,24 @@ public class Card {
         return rank + suit;
     }
 
-    // Метод для отримання шляху до картинки карти
+    // Для завантаження картинки
     public String getImagePath() {
-        // Rank
-        String r;
+        String r = rank;
         switch(rank) {
             case "A": r = "ace"; break;
             case "J": r = "jack"; break;
             case "Q": r = "queen"; break;
             case "K": r = "king"; break;
-            default: r = rank; break;
         }
 
-        // Suit
-        String s;
+        String s = "";
         switch(suit) {
             case "♣": s = "clubs"; break;
             case "♦": s = "diamonds"; break;
             case "♥": s = "hearts"; break;
             case "♠": s = "spades"; break;
-            default: s = "unknown"; break;
         }
 
-        // Повертаємо шлях у ресурсах (classpath)
         return "/cards/" + r + "_of_" + s + ".png";
     }
 }

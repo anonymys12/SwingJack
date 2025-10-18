@@ -12,9 +12,9 @@ public class BlackjackGUI extends JFrame {
     private final List<Card> playerCards = new ArrayList<>();
     private final List<Card> dealerCards = new ArrayList<>();
 
-    private final JButton hitBtn = createButton("Hit", new Color(220,20,60));
-    private final JButton standBtn = createButton("Stand", new Color(30,144,255));
-    private final JButton newBtn = createButton("New Game", new Color(34,139,34));
+    private final JButton hitBtn = createButton("Hit", new Color(220, 20, 60));
+    private final JButton standBtn = createButton("Stand", new Color(30, 144, 255));
+    private final JButton newBtn = createButton("New Game", new Color(34, 139, 34));
 
     private final CardPanel playerPanel = new CardPanel(playerCards, false);
     private final CardPanel dealerPanel = new CardPanel(dealerCards, true);
@@ -27,14 +27,12 @@ public class BlackjackGUI extends JFrame {
         setSize(900, 650);
         setLayout(new BorderLayout());
 
-        // Панелі гравця і дилера
-        JPanel center = new JPanel(new GridLayout(2,1,0,10));
-        center.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        JPanel center = new JPanel(new GridLayout(2, 1, 0, 10));
+        center.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         center.add(dealerPanel);
         center.add(playerPanel);
         add(center, BorderLayout.CENTER);
 
-        // Панель кнопок
         JPanel controls = new JPanel();
         controls.add(hitBtn);
         controls.add(standBtn);
@@ -42,13 +40,12 @@ public class BlackjackGUI extends JFrame {
         controls.setBackground(new Color(0, 70, 0));
         add(controls, BorderLayout.SOUTH);
 
-        // Статус гри
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         statusLabel.setOpaque(true);
-        statusLabel.setBackground(new Color(50,50,50));
+        statusLabel.setBackground(new Color(50, 50, 50));
         statusLabel.setForeground(Color.WHITE);
         statusLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(10,0,10,0));
+        statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         add(statusLabel, BorderLayout.NORTH);
 
         hitBtn.addActionListener(e -> onHit());
@@ -58,9 +55,6 @@ public class BlackjackGUI extends JFrame {
         startGame();
     }
 
-    // ----------------------------------------
-    // Кнопки з градієнтом і натисканням
-    // ----------------------------------------
     private JButton createButton(String text, Color baseColor) {
         JButton btn = new JButton(text) {
             private boolean pressed = false;
@@ -79,94 +73,87 @@ public class BlackjackGUI extends JFrame {
 
                 g2.setColor(baseColor.darker().darker());
                 g2.setStroke(new BasicStroke(2));
-                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 20, 20);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
 
                 FontMetrics fm = g2.getFontMetrics();
                 int tx = (getWidth() - fm.stringWidth(getText())) / 2;
                 int ty = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
                 g2.setColor(Color.WHITE);
                 g2.drawString(getText(), tx, ty);
-
                 g2.dispose();
             }
 
             @Override
             public boolean isContentAreaFilled() { return false; }
+
             @Override
             public boolean isFocusPainted() { return false; }
 
             @Override
             protected void processMouseEvent(MouseEvent e) {
-                if (e.getID() == MouseEvent.MOUSE_PRESSED) pressed = true;
-                else if (e.getID() == MouseEvent.MOUSE_RELEASED || e.getID() == MouseEvent.MOUSE_EXITED) pressed = false;
-                repaint();
                 super.processMouseEvent(e);
+                if (e.getID() == MouseEvent.MOUSE_PRESSED) pressed = true;
+                if (e.getID() == MouseEvent.MOUSE_RELEASED) pressed = false;
+                repaint();
             }
         };
 
-        btn.setPreferredSize(new Dimension(140, 50));
-        btn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) { btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); }
-            @Override
-            public void mouseExited(MouseEvent e) { btn.setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); }
-        });
-
+        btn.setFont(new Font("SansSerif", Font.BOLD, 16));
         return btn;
     }
 
-    // ----------------------------------------
-    // Початок гри з анімацією
-    // ----------------------------------------
     private void startGame() {
         deck = new Deck();
         deck.shuffle();
         playerCards.clear();
         dealerCards.clear();
 
-        hitBtn.setEnabled(false);
-        standBtn.setEnabled(false);
-        statusLabel.setText("Dealing...");
+        dealerPanel.hideDealerCards();
 
-        Card[] dealOrder = new Card[4];
-        for (int i = 0; i < 4; i++) dealOrder[i] = deck.draw();
+        final int[] index = {0};
+
+        // Порядок роздачі
+        final Card[] dealOrder = {deck.draw(), deck.draw(), deck.draw(), deck.draw()};
 
         Timer timer = new Timer(400, null);
-        final int[] index = {0};
         timer.addActionListener(e -> {
-            if (index[0] == 0 || index[0] == 2) playerCards.add(dealOrder[index[0]]);
-            else dealerCards.add(dealOrder[index[0]]);
-            playerPanel.repaint();
-            dealerPanel.repaint();
-            index[0]++;
-            if (index[0] >= dealOrder.length) {
+            int i = index[0]++;
+            if (i >= dealOrder.length) {
                 ((Timer)e.getSource()).stop();
+                statusLabel.setText("Your move");
                 hitBtn.setEnabled(true);
                 standBtn.setEnabled(true);
-                int val = calculateBest(playerCards);
-                statusLabel.setText(val == 21 ? "Blackjack!" : "Your move");
+                repaintPanels();
+                return;
+            }
+
+            Card c = dealOrder[i];
+            if (i % 2 == 0) {
+                playerCards.add(c);
+                playerPanel.animateCard(c, playerCards.size() - 1);
+            } else {
+                dealerCards.add(c);
+                dealerPanel.animateCard(c, dealerCards.size() - 1);
             }
         });
         timer.start();
+
+        hitBtn.setEnabled(false);
+        standBtn.setEnabled(false);
     }
 
-    // ----------------------------------------
-    // Дії гравця
-    // ----------------------------------------
     private void onHit() {
-        playerCards.add(deck.draw());
-        playerPanel.repaint();
+        Card c = deck.draw();
+        playerCards.add(c);
+        playerPanel.animateCard(c, playerCards.size() - 1);
+
         int val = calculateBest(playerCards);
         if (val > 21) {
             statusLabel.setText("You busted: " + val);
-            dealerPanel.revealDealerCards();
-            hitBtn.setEnabled(false);
-            standBtn.setEnabled(false);
-            return;
+            endRound();
         } else if (val == 21) {
             statusLabel.setText("You have 21!");
-            onStand();
-            return;
+            endRound();
         } else {
             statusLabel.setText("Your sum: " + val);
         }
@@ -176,27 +163,45 @@ public class BlackjackGUI extends JFrame {
         hitBtn.setEnabled(false);
         standBtn.setEnabled(false);
 
-        // Дилер тягне карти автоматично
-        while (calculateBest(dealerCards) < 17) {
-            dealerCards.add(deck.draw());
-        }
+        dealerPanel.revealDealerCards();
 
-        dealerPanel.revealDealerCards(); // відкриваємо карти дилера
+        Timer dealerTimer = new Timer(400, null);
+        dealerTimer.addActionListener(e -> {
+            int val = calculateBest(dealerCards);
+            if (val < 17) {
+                Card c = deck.draw();
+                dealerCards.add(c);
+                dealerPanel.animateCard(c, dealerCards.size() - 1);
+            } else {
+                ((Timer)e.getSource()).stop();
+                endRound();
+            }
+        });
+        dealerTimer.start();
+    }
 
-        int dealerVal = calculateBest(dealerCards);
-        int playerVal = calculateBest(playerCards);
+    private void endRound() {
+        hitBtn.setEnabled(false);
+        standBtn.setEnabled(false);
+        dealerPanel.revealDealerCards();
 
-        // Перевірка перебору
+        int player = calculateBest(playerCards);
+        int dealer = calculateBest(dealerCards);
+
         String result;
-        if (playerVal > 21) result = "You busted. Dealer wins (" + dealerVal + ")";
-        else if (dealerVal > 21) result = "Dealer busted. You win (" + playerVal + ")";
-        else if (playerVal > dealerVal) result = "You win: " + playerVal + " vs " + dealerVal;
-        else if (playerVal < dealerVal) result = "Dealer wins: " + dealerVal + " vs " + playerVal;
-        else result = "Push: both " + playerVal;
+        if (player > 21) result = "You busted. Dealer wins (" + dealer + ")";
+        else if (dealer > 21) result = "Dealer busted. You win (" + player + ")";
+        else if (player > dealer) result = "You win: " + player + " vs " + dealer;
+        else if (player < dealer) result = "Dealer wins: " + dealer + " vs " + player;
+        else result = "Push: both " + player;
 
         statusLabel.setText(result);
-        playerPanel.repaint();
+        repaintPanels();
+    }
+
+    private void repaintPanels() {
         dealerPanel.repaint();
+        playerPanel.repaint();
     }
 
     private int calculateBest(List<Card> cards) {
