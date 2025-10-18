@@ -1,20 +1,26 @@
 plugins {
-    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
-group = 'org.example'
-version = '1.0-SNAPSHOT'
+group = 'com.example'
+version = '0.1.0'
+
+sourceCompatibility = '17'
+
+application {
+    mainClass = 'com.example.swingjack.BlackjackGUI'
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
 }
 
-test {
-    useJUnitPlatform()
+shadowJar {
+    archiveBaseName.set('swingjack')
+    archiveClassifier.set('all')
 }
